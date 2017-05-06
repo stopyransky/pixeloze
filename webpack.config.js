@@ -19,6 +19,7 @@ module.exports = {
       Vect2d : path.resolve( './app/components/Vect2d.js' ),
       QuadTree : path.resolve( './app/components/QuadTree.js' ),
       Pixeloze : path.resolve('./app/components/Pixeloze.js'),
+      Pixeloze2 : path.resolve('./app/components/Pixeloze2.js'),
       Utils : path.resolve('./app/components/Utils.js'),
     },
     extensions: [ '.js', '.jsx' ]

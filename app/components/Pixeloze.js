@@ -21,7 +21,8 @@ var Pixeloze = ( function(window) {
     w, h, br,
     assetCount = 0,
     markAssetsToReset = false,
-    ORANGE, YELLOW, WHITE;
+    
+    var ORANGE, YELLOW, WHITE;
 
 
 function setup() {
@@ -37,12 +38,14 @@ function setup() {
     
     root = new QuadTree( 0, 0, width, height, null );
     
-    mouseBox = new Boxed( width/2, height/2 );
+    mouseBox = new Box( width/2, height/2 );
     
-    mouseBox.setSize( 1 );
+    mouseBox.setDimension( 10, 10 );
     
     for(var i = 0; i < 50; i++) {
+        
         var b = new Boxed(random(width), random(height));
+        
         boxes[boxes.length] = b;
     }
     
@@ -285,6 +288,7 @@ function reset() {
 }
 
 function windowResized() {
+    
     resizeCanvas(window.innerWidth, window.innerHeight);
     var oldSize = root.getDimension();
     root.resizeQuad(window.innerWidth-1, window.innerHeight-1);
