@@ -114,8 +114,8 @@ var updateMotion = function(quad) {
 var applyBehaviors = function(quad) {
     var val = quad.getValue();
     if(val !== null) {
-            if(!val.mutable) val.stayWithin(root);
-            val.separate(root.getObjectsUnder(val), addons, removals);
+        if(!val.mutable) val.stayWithin(root);
+        val.separate(root.getObjectsUnder(val), addons, removals);
     }
 };
 

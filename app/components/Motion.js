@@ -2,8 +2,7 @@
     var Box = require("Box");
 
     var Motion = ( function() { 
-
-
+        
         //Motion.IDLE = 1; // able to move but not affected by any forces (velocity = 0)
         //Motion.MOVING = 2; // is moving currently
         Motion.MAXSPEED = 20;

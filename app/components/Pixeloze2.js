@@ -15,6 +15,7 @@ var Pixeloze = ( function( window ) {
     var mouseBox; 
 
     var ORANGE, YELLOW, WHITE;
+    var container;
 
     function setup() {
 
@@ -26,6 +27,11 @@ var Pixeloze = ( function( window ) {
         textAlign( CENTER, CENTER );
         textSize( 20 );
         textFont( "Monospace", 20 );
+
+        container = document.getElementById("defaultCanvas0");
+        container.addEventListener("mouseout", mouseExited);
+        container.addEventListener("mouseover", mouseEntered);
+
         root = new QuadTree( 0, 0, width, height, null );
         
         ORANGE = color( 255, 89,0, 255 );
@@ -34,7 +40,7 @@ var Pixeloze = ( function( window ) {
             
         WHITE = color( 255, 255, 255 );
         
-        mouseBox = new Box( width/2, height/2, 10, 10 );
+        mouseBox = new Box( -100, -100, 1, 1 );
         
         
         for(var i = 0; i < 50; i++) {
@@ -45,47 +51,72 @@ var Pixeloze = ( function( window ) {
 
     }
 
-
-
-
-    var displayQuadTree = function(quad) {
-
-        rect(quad.x1(), quad.y1(), quad.width(), quad.height());
-    };
-
-    var displayHoverQuads = function(quad) {
-        if(quad.intersectsBox(mouseBox)) {
+    function displayQuadTree() {
+        var displayQuadTree = function(quad) {
             rect(quad.x1(), quad.y1(), quad.width(), quad.height());
-        }
-    };
+        };
 
-    var displayQuadContent = function(quad) {
-        var obj = quad.getValue();
-
-        rect(obj.x1(), obj.y1(), obj.width(), obj.height());
-    };
-    
-    function draw() {
-        background(222);
-        
         stroke(120);
         fill(0, 20);
         root.traverse(displayQuadTree, true);
+    }
 
+    function displayHoverQuads () {
+        var displayHoverQuads = function(quad) {
+            if(quad.intersectsBox(mouseBox)) {
+                rect(quad.x1(), quad.y1(), quad.width(), quad.height());
+            }
+        }; 
         noStroke();
         fill(0,20);
-        root.traverse(displayHoverQuads, true);
+        root.traverse(displayHoverQuads, true);  
+    }
+
+    function displayQuadContent() {
+        
+        var displayQuadContent = function(quad) {
+            var obj = quad.getValue();
+            rect(obj.x1(), obj.y1(), obj.width(), obj.height());
+        };
 
         fill(ORANGE);
-        noStroke();
+        stroke(255);
         root.traverse(displayQuadContent, false);
+    }
 
+    var updateMotion = function(quad) {
+        var b = quad.getValue();
+        if( b ) {
+            if(!b.mutable) return;
+                b.update();
+        }
+    };
 
-        stroke(0);
-        noFill();
-        ellipse(mouseBox.x(), mouseBox.y(), mouseBox.width(), mouseBox.height());
+    var applyBehaviors = function(quad) {
+        var b = quad.getValue();
+        if( b ) {
+            if(!b.mutable) b.stayWithin(root);
+            b.separate( root.getObjectsUnder( b ), addons, removals );
+        }
+    };
 
+    function draw() {
+        
+        root.traverse( applyBehaviors, false);    
+        root.traverse( updateMotion, false );
 
+        background(222);
+        
+        displayQuadTree();
+
+        displayHoverQuads();
+
+        displayQuadContent();
+
+        //show mouse position
+        // stroke(0);
+        // noFill();
+        // ellipse(mouseBox.x(), mouseBox.y(), mouseBox.width(), mouseBox.height());
     }
 
     function mouseMoved() {
@@ -96,11 +127,25 @@ var Pixeloze = ( function( window ) {
         mouseMoved();
     }
 
+
+    function mouseExited() {
+        // console.log("exit");
+        mouseBox.setCenter(-100,-100);
+    }
+
+    function mouseEntered() {
+        // console.log("enter");
+        mouseMoved();
+    }
+
     return {
         setup : setup,
         draw : draw,
         mouseMoved : mouseMoved,
-        mouseDragged : mouseDragged
+        mouseDragged : mouseDragged,
+        // mouseEntered : mouseEntered,
+        // mouseExited : mouseExited
+
     }
 
 
