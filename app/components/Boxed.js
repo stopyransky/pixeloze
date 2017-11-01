@@ -15,7 +15,7 @@ var Motion = require("Motion");
 
             // Boxed implementation (related to motion)
             this.immortal = false;     
-            this.mutable = true;
+            //this.mutable = true;
 
             //this.data = new DataObject( opt_data || {} );
             // data container functionality vars 
@@ -91,10 +91,10 @@ var Motion = require("Motion");
             setValue : function ( val ) {
                 
                 this.value = val;
-                if (this.value !== null)
-                    this.mutable =  false ;
-                else
-                    this.mutable = true;
+                //if (this.value !== null)
+                //     this.mutable =  false ;
+                // else
+                //     this.mutable = true;
                 return this;
                 
             },
@@ -149,7 +149,7 @@ var Motion = require("Motion");
                 
             },
 
-            separate : function ( movers, rootQuad ) {
+            separate : function ( movers ) {
                 var steer = new Vect2d();
                 var count = 0;
 
@@ -157,14 +157,11 @@ var Motion = require("Motion");
                     var other = movers[i];
                     var d = Vect2d.dist( this.pos, other.pos );
                     var desiredsep = ( this.size + other.size ) * 0.5;
-                        //  if (d === 0) {
-                        //  steer.add(Vect2d.prototype.subtract(this.pos, movers[i].pos).setMag(desiredsep));
-                        //  count++;
-                        //  }
+
                     if (d > 0 && d < desiredsep) {
-                        this.immortal = true;
-                        if (!other.immortal)
-                            other.onImpact( rootQuad );
+                        // this.immortal = true;
+                        // if (!other.immortal)
+                        //     other.onImpact( rootQuad );
 
                         steer.add( Vect2d.subtract( this.pos, other.pos ).setMag( 1 / d ) );
                         count++;
@@ -176,10 +173,11 @@ var Motion = require("Motion");
                     //if(!other.immortal) other.onImpact();
                     this.applyForce(steer.div(count).setMag( Motion.MAXSPEED)
                             .sub(this.vel).limit( Motion.MAXSPEED * this.size));
-                } else {
-                    this.immortal = false;
-                    // else -> it goes away using vel set already! hence it moves !
-                }
+                } 
+                // else {
+                //     this.immortal = false;
+                //     // else -> it goes away using vel set already! hence it moves !
+                // }
 
 
             },

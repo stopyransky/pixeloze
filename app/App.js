@@ -11,4 +11,4 @@ var p5 = require('p5');
     window.mouseDragged = PIXELOZE.mouseDragged;
     // window.mouseWheel =  PIXELOZE.mouseWheel;
     // window.windowResized =  PIXELOZE.windowResized;
-} )( require('Pixeloze2') ); 
+} )( require('Pixeloze') ); 

@@ -63,14 +63,302 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 4);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var p5 = __webpack_require__(2);
+var Vect2d = __webpack_require__(1);
+var { random }  = __webpack_require__(7);
+
+var Box = ( function() {
+        
+        Box.MINSIZE = 6;
+        Box.MAXSIZE = 22;
+        
+        function Box( _left, _top, _width, _height ) {
+            // this.left = _left || 0;
+            // this.top = _top || 0;
+            var s = random( Box.MINSIZE, Box.MAXSIZE );
+            // this.w = _width || s;
+            // this.h = _height || s;
+            this.pos = new Vect2d( _left + _width * 0.5, _top + _height * 0.5 ) || new Vect2d();
+            this.dim = new Vect2d( _width, _height ) ||  new Vect2d( s, s ); 
+        }
+        
+        Box.prototype = {
+
+            constructor : Box,
+
+            // PRIMARY METHODS - work on internal variables
+            setCenter : function( x , y ) {
+                // this.left = x - this.w * 0.5;
+                // this.top = y - this.h * 0.5;
+                this.pos.set( x, y );
+                return this;
+            },
+            
+            getCenter : function() {
+                //return new Vect2d( this.x(), this.y() );
+                return this.pos;
+            },
+            
+
+            getDimension : function() {
+                //return new Vect2d( this.w, this.h ); 
+                return this.dim;
+            },
+
+            setDimension : function( w, h ) {
+                this.dim.set(w, h);
+                return this;
+            },
+            
+            // LEFT
+
+            x1 : function() {
+                //return this.left;
+                return this.pos.x - this.dim.x * 0.5;
+            },
+
+            // TOP
+            y1 : function() {
+                //return this.top;
+                return this.pos.y - this.dim.y * 0.5;
+            },
+
+            // computed CENTER X
+            x : function() {
+                //return this.left + this.w * 0.5;
+                return this.pos.x;
+            },
+
+            // computed CENTER Y 
+            y : function() { 
+                //return this.top + this.h * 0.5;
+                return this.pos.y;
+            },
+
+            // computed RIGHT edge
+            x2 : function() {
+                //return this.left + this.w;
+                return this.pos.x + this.dim.x * 0.5;
+            },
+
+            // computed BOTTOM edge
+            y2 : function() { 
+                //return this.top + this.h;
+                return this.pos.y + this.dim.y * 0.5;
+            },
+            
+            // WIDTH
+            width : function() {
+                //return this.w;
+                return this.dim.x;
+            },
+
+            // HEIGHT
+            height : function() {
+                //return this.h;
+                return this.dim.y;
+            },
+
+            // SECONDARY METHODS - work on primary methods
+            
+            left : function() { 
+                return this.x1();
+            },
+
+            top : function() {
+                return this.y1();
+            },
+
+            bottom : function() {
+                return this.y2();
+            },
+
+            right : function() {
+                return this.x2();
+            },
+            
+            intersects : function ( x1, y1, x2, y2 ) {
+                
+                return !( this.x2() < x1 || 
+                          x2 < this.x1() || 
+                          this.y2() < y1 || 
+                          y2 < this.y1() );    
+            },
+           
+            intersectsBox : function ( box ) {
+                
+                return !( this.x2() < box.x1() || 
+                          box.x2() < this.x1() || 
+                          this.y2() < box.y1() || 
+                          box.y2() < this.y1() );
+                  
+            },
+          
+            containsPoint : function ( xx, yy ) {
+                
+                return xx >= this.x1() && 
+                       yy >= this.y1() && 
+                       xx <= this.x2() && 
+                       yy <= this.y2();
+               
+            },
+            
+            contains : function( x1, y1, x2, y2 ) {
+                return x1 >= this.x1() && 
+                       y1 >= this.y1() && 
+                       x2 <= this.x2() && 
+                       y2 <= this.y2();
+            },
+            
+            containsBox : function( box ) {
+                return box.x1() >= this.x1() && 
+                       box.y1() >= this.y1() && 
+                       box.x2() <= this.x2() && 
+                       box.y2() <= this.y2();
+            }
+        }
+
+        return Box;    
+    } )();
+
+    module.exports = Box;
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports) {
+
+
+    var Vect2d = ( function() {
+        
+        function Vect2d( x, y ) {
+            this.x = x || 0.0;
+            this.y = y || 0.0;
+        }    
+        
+        Vect2d.subtract = function (v1, v2) {
+            return new Vect2d(v1.x - v2.x, v1.y - v2.y);
+        };
+
+        Vect2d.dist = function (v1, v2) {
+            const dx = v1.x - v2.x;
+            const dy = v1.y - v2.y;
+            return Math.sqrt(dx * dx + dy * dy);
+        };
+
+        Vect2d.distSq = function (v1, v2) {
+            const dx = v1.x - v2.x;
+            const dy = v1.y - v2.y;
+            return dx * dx + dy * dy;
+        };
+
+        Vect2d.prototype =  { 
+            
+            constructor : Vect2d,
+            
+            set : function( x_, y_ ) {
+                this.x = x_;
+                this.y = y_;
+                return this;
+            }, 
+            
+            add : function( v ) {
+                this.x += v.x;
+                this.y += v.y;
+                return this;                
+            },
+            
+            sub : function (v) {
+                this.x -= v.x;
+                this.y -= v.y;
+                return this;
+            },
+            
+            mult : function (v) {
+                this.x *= v.x;
+                this.y *= v.y;
+                return this;
+            },
+            
+            scale : function (num) {
+                this.x *= num;
+                this.y *= num;
+                return this;
+            },
+            
+            div : function (num) {
+                this.x /= num;
+                this.y /= num;
+                return this;
+            },
+            
+            mag : function () {
+                return Math.sqrt(this.x * this.x + this.y * this.y);
+            },
+            
+            magSq : function () {
+                return this.x * this.x + this.y * this.y;
+            },
+            
+            theta : function () {
+                return Math.atan2( this.y, this.x );
+            },
+
+            normalize : function () {
+                var m = this.mag();
+                if (m > 1)
+                    this.div( m );
+                return this;
+            },
+            
+            setMag : function ( len ) {
+                this.normalize();
+                this.scale( len );
+                return this;
+            },
+            
+            limit : function (max) {
+                return this.magSq() > max * max ? 
+                       this.setMag( max ) : this;
+            },
+            
+            isZero : function(){
+                return this.magSq() < Number.EPSILON;
+            },
+            
+            clamp : function ( max ) {
+                return this.isZero() ? this.scale( 0 ) : this.limit( max );
+            },
+
+            equals : function( v ) {
+                return  ( ( v.x === 0 || v.x ) ? 
+                            ( ( v.y === 0 || v.y ) ? 
+                                ( (this.x === 0 || this.x ) ? 
+                                    ( (this.y === 0 || this.y ) ? 
+                                        Vect2d.subtract( this, v ).isZero() : 
+                                    false ) :
+                                false ) : 
+                            false ) : 
+                        false );
+            }
+        };
+
+        return Vect2d;
+    } )();
+
+
+    module.exports = Vect2d;
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var p5 = __webpack_require__(8);
 
 ( function(PIXELOZE){
     window.setup = PIXELOZE.setup;
@@ -83,11 +371,678 @@ var p5 = __webpack_require__(2);
     window.mouseDragged = PIXELOZE.mouseDragged;
     // window.mouseWheel =  PIXELOZE.mouseWheel;
     // window.windowResized =  PIXELOZE.windowResized;
-} )( __webpack_require__(9) ); 
+} )( __webpack_require__(11) ); 
 
 /***/ }),
-/* 1 */,
-/* 2 */
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Vect2d = __webpack_require__(1);
+var Box = __webpack_require__(0);
+var Motion = __webpack_require__(4);
+
+
+    var Boxed = ( function() {
+        
+        function Boxed( _cx, _cy, opt_size, opt_data ) {
+
+            this.size = opt_size || random( Box.MINSIZE, Box.MAXSIZE );
+            
+            var d = new Vect2d( this.size, this.size );
+            
+            Motion.call( this, _cx, _cy, d ); 
+
+            // Boxed implementation (related to motion)
+            this.immortal = false;     
+            //this.mutable = true;
+
+            //this.data = new DataObject( opt_data || {} );
+            // data container functionality vars 
+            this.value = null;
+            this.name = "";
+            this.icon = null;
+            this.link = "";
+
+            // interactivity functionality vars
+            this.mouseover = false;
+            this.pressed = false;
+            this.dragged = false;
+    
+        }
+
+        Boxed.prototype = Object.assign( {
+            
+            constructor : Boxed,
+
+
+            // INTERACTIVE implementation
+            isMouseOver : function () {
+                
+                return this.mouseover;
+                
+            },
+
+            isPressed : function () {
+                
+                return this.pressed;
+                
+            },
+
+            isDragged : function () {
+                
+                return this.dragged;
+                
+            },
+
+            setPressed : function ( flag ) {
+                
+                this.pressed = flag;
+                
+            },
+
+            setDragged : function ( flag ) {
+                
+                this.dragged = flag;
+                
+            },
+
+            // DATA CONTAINER object implementation
+            setLink : function ( link ) {
+                
+                this.link = link;
+                return this;
+                
+            },
+
+            setIcon : function ( icon ) {
+                
+                this.icon = icon;
+                return this;
+                
+            },
+
+            getValue : function () {
+                
+                return this.value;
+                
+            },
+
+            setValue : function ( val ) {
+                
+                this.value = val;
+                //if (this.value !== null)
+                //     this.mutable =  false ;
+                // else
+                //     this.mutable = true;
+                return this;
+                
+            },
+
+            getName : function () {
+                return this.name;
+            },
+
+            setName : function (n) {
+                
+                this.name = n;
+                return this;
+                
+            },
+
+            // BOX implementation 
+            getSize : function () {
+                return this.size;
+            
+            },
+
+            setSize : function ( s ) {
+                this.size = s;
+                this.dim.set( s, s);
+                return this;
+                
+            },
+
+            getPos : function () {
+                return this.pos;
+            },
+            
+
+            // MOTION IMPLEMENTATION
+            seek : function ( vector ) {
+                
+                this.applyForce( Vect2d.subtract( vector, this.pos )
+                        .setMag( Motion.MAXSPEED )
+                        .sub( this.vel )
+                        .limit( Motion.MAXFORCE )
+                        );
+                
+            },
+
+            avoid : function ( vector ) {
+                
+                this.applyForce(
+                        Vect2d.subtract( this.pos, vector )
+                        .setMag( Motion.MAXSPEED )
+                        .sub( this.vel )
+                        .limit( Motion.MAXFORCE ));
+                
+            },
+
+            separate : function ( movers ) {
+                var steer = new Vect2d();
+                var count = 0;
+
+                for (var i = 0; i < movers.length; i++) {
+                    var other = movers[i];
+                    var d = Vect2d.dist( this.pos, other.pos );
+                    var desiredsep = ( this.size + other.size ) * 0.5;
+
+                    if (d > 0 && d < desiredsep) {
+                        // this.immortal = true;
+                        // if (!other.immortal)
+                        //     other.onImpact( rootQuad );
+
+                        steer.add( Vect2d.subtract( this.pos, other.pos ).setMag( 1 / d ) );
+                        count++;
+                    }
+
+
+                }
+                if (count > 0) {
+                    //if(!other.immortal) other.onImpact();
+                    this.applyForce(steer.div(count).setMag( Motion.MAXSPEED)
+                            .sub(this.vel).limit( Motion.MAXSPEED * this.size));
+                } 
+                // else {
+                //     this.immortal = false;
+                //     // else -> it goes away using vel set already! hence it moves !
+                // }
+
+
+            },
+
+            onImpact : function ( rootQuad ) {
+                //console.log("onImpact()");
+                if ( this.isMutable ) {
+                    var n = this.size;
+
+                    if (n > Box.MINSIZE) {
+                        //console.log("this.size > 4");
+                        //var p = random(1);
+
+                        for (var i = 0; i < random(2, n * 0.5); i++) {
+                            //console.log("forloop impact");
+                            var bx = new Boxed(this.x() + random(1, -1), this.y() + random(1, -1), random(n * 0.5, n * 0.8));
+                            bx.immortal = true;
+                            rootQuad.add( bx );
+                            //addons[addons.length] = bx;
+                        }
+                    }
+                    //console.log("added");
+                    //removals[removals.length]= other;
+                    //removals[removals.length] = this;
+                    rootQuad.remove(this.x(). this.y());
+                    //boxes.remove(this);
+                }
+            },
+
+
+            stayWithin : function ( border ) {
+                var vel = this.vel;
+                if (this.x1() <= border.x1()) {
+
+                    this.vel.set(-vel.x ,vel.y).scale(0.9);;
+                    //this.applyForce(new Vect2d(Boxed.MAXSPEED, vel.y)
+                    //        .sub(vel).limit(Boxed.MAXFORCE));
+
+                } else if (this.x2() >= border.x2()) {
+                    this.vel.set(-vel.x,vel.y).scale(0.9);
+                    // this.applyForce(new Vect2d(-Boxed.MAXSPEED, vel.y)
+                    //         .sub(vel).limit(Boxed.MAXFORCE));
+
+                } else if (this.y1() <= border.y1()) {
+                    this.vel.set(vel.x,-vel.y).scale(0.9);
+                    // this.applyForce(new Vect2d(vel.x, Boxed.MAXSPEED)
+                    //         .sub(vel).limit(Boxed.MAXFORCE));
+
+                } else if (this.y2() >= border.y2()) {
+                    this.vel.set(vel.x,-vel.y).scale(0.9);;
+                    // this.applyForce(new Vect2d(vel.x, -Boxed.MAXSPEED)
+                    //         .sub(vel).limit(Boxed.MAXFORCE));
+
+                }
+            }
+
+        }, Motion.prototype );
+
+        return Boxed;
+    } )();
+    
+module.exports = Boxed;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+    var Vect2d = __webpack_require__(1);
+    var Box = __webpack_require__(0);
+
+    var Motion = ( function() { 
+        
+        //Motion.IDLE = 1; // able to move but not affected by any forces (velocity = 0)
+        //Motion.MOVING = 2; // is moving currently
+        Motion.MAXSPEED = 20;
+        Motion.MAXFORCE = 0.95;
+        Motion.FRICTION = 0.998; // environmental setting should be set somewhere else
+        
+        function Motion( _cx, _cy, _dim, _mass ) {
+
+            Box.call( this, _cx - _dim.x * 0.5, _cy - _dim.x * 0.5, _dim.x, _dim.y );
+            
+            //this.position = _pos || new Vect2d();
+            this.vel = new Vect2d();
+            this.acc = new Vect2d();
+            this.mass = _mass || 1;
+            //this.state = Motion.IDLE;
+            this.movable = true;
+
+            Object.defineProperty( this, "isMoving", {
+                get : function() { 
+                    return !this.vel.isZero();
+                }
+            });
+
+        }
+
+        
+        Motion.prototype = Object.assign( Box.prototype, {
+            
+            constructor : Motion,
+            
+            update : function() {
+                if( this.movable ) {
+                    this.vel.add( this.acc );
+                    this.acc.scale( 0 );
+                    this.vel.scale( Motion.FRICTION );
+                    this.vel.clamp( Motion.MAXSPEED ); // makes vel to be 0 to MAXSPEED, small numbers are clamped to 0.
+                    if( this.isMoving ) { // if magnitudesq of velocity is larger than very small EPSILON number
+                        //this.state = Motion.MOVING;
+                        this.pos.add( this.vel );
+                    } 
+                    //else {
+                        //this.state = Motion.IDLE; 
+                    //}
+                }
+                
+                
+            },
+
+            setMovable : function( flag ) {
+                this.movable = flag;
+                if( !this.movable ) {
+                    this.acc.scale( 0 );
+                    this.vel.scale( 0 );
+                    this.state = Motion.IDLE;
+                }
+            },
+            
+            applyForce : function( force ) {
+                if( this.movable ) { 
+                    force.div( this.mass );
+                    this.acc.add( force );
+                    this.acc.clamp( Motion.MAXFORCE );
+                }
+            }
+        } );
+
+        return Motion;
+    } )();
+
+
+    module.exports = Motion;
+
+/***/ }),
+/* 5 */,
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Box = __webpack_require__(0);
+
+var QuadTree = ( function () { 
+
+    var journal = [];
+    
+    // static variables
+    QuadTree.EMPTY = 0;
+    QuadTree.LEAF = 1;
+    QuadTree.POINTER = 2;
+    QuadTree.OFFSET = Box.MAXSIZE * 2; // to help looking objects on border of quads
+     
+    var lookupBox = new Box( 0, 0, QuadTree.OFFSET, QuadTree.OFFSET );
+    var needsUpdate = true;
+    
+    function journalAdd(box) {
+        journal.push(box);
+    }
+
+    function journalRemove(box) {
+        var index = journal.indexOf(box);
+        if( index > -1 ) {
+            journal.splice(index,1);
+            return box;
+        } else {
+            return false;
+        }
+    }
+    function put( quad, box ) {
+        quad.value = box;
+        quad.type = QuadTree.LEAF;
+        journalAdd(box);
+    }
+    
+    function clear( quad ) {
+        quad.value = null;
+        quad.nw = null;
+        quad.ne = null;
+        quad.sw = null;
+        quad.se = null;
+        quad.type = QuadTree.EMPTY;
+        quad.parent = null;
+    }    
+    
+    function subdivide( quad ) {
+        
+        var halfw = quad.width() * 0.5,
+            halfh = quad.height() * 0.5,
+                x = quad.x1(),
+                y = quad.y1();
+
+        quad.nw = new QuadTree( x        , y        , halfw, halfh, quad );
+        quad.ne = new QuadTree( x + halfw, y        , halfw, halfh, quad );
+        quad.sw = new QuadTree( x        , y + halfh, halfw, halfh, quad );
+        quad.se = new QuadTree( x + halfw, y + halfh, halfw, halfh, quad );
+
+        var b = quad.value;
+        quad.value = null;
+        quad.type = QuadTree.POINTER;
+        var cx = b.x();
+        var cy = b.y();
+        
+        if ( quad.nw.containsPoint( cx, cy ) ) {
+            //quad.nw.add( b );
+            put(quad.nw, b );
+        } else if ( quad.ne.containsPoint( cx, cy ) ) {
+            //quad.ne.add( b );
+            put(quad.ne, b );
+        } else if ( quad.sw.containsPoint( cx, cy ) ) {
+            //quad.sw.add( b );
+            put( quad.sw, b );
+        } else if ( quad.se.containsPoint( cx, cy ) ) {
+            //quad.se.add( b );
+            put( quad.se, b );
+        } else {
+            console.log( "QuadTree.subdivide(): Failed to re-add object on subdivide. Makes quad.pointer size === 0!");
+        }
+        
+        return true ;
+
+    }
+
+
+    function QuadTree( left_, top_, width_, height_, opt_parent ) {
+        
+        Box.call( this, left_, top_, width_, height_ );
+
+        this.parent = opt_parent || null;
+
+        this.nw = null;
+        this.ne = null;
+        this.sw = null;
+        this.se = null;
+        
+        this.value = null;
+        
+        this.type = QuadTree.EMPTY;
+    }
+
+    QuadTree.prototype = Object.assign( Box.prototype, {
+        
+        getRoot : function () {
+                return this.parent ? this.parent.getRoot() : this;
+        },
+
+        getValue : function() {
+                return this.value;
+        },
+
+        getType : function() { 
+            return this.type;
+        },
+        add : function(box) {
+            const x = box.x();
+            const y = box.y();
+            
+            if ( !this.containsPoint( x, y ) ) {
+                   return false; // object is not within this quad borders
+            }
+
+            switch ( this.type ) {
+                case QuadTree.EMPTY:
+                    // console.log("adding " + box.toSource()); 
+                    //this.put( box );
+                    put( this, box );
+                    return true;
+                case QuadTree.LEAF:
+                    //console.log ( "readded in subdivide: " + subdivide( this ) ) ;
+                    subdivide( this );
+                    //return true; //don't return here -> let case pointer to work after subdivide!
+                case QuadTree.POINTER:
+                    if ( this.nw.containsPoint( x, y ) )
+                        return this.nw.add( box );
+                    else if ( this.ne.containsPoint( x, y ) )
+                        return this.ne.add( box );
+                    else if (this.sw.containsPoint( x, y ) )
+                        return this.sw.add( box );
+                    else if (this.se.containsPoint( x, y ) )
+                        return this.se.add( box );
+                default : 
+                    throw new Error("QuadTree.add(): not recognized quad type" + this.type);
+            }
+        },
+
+        remove : function(box) {
+            return journalRemove(box);
+        },
+
+        traverse : function ( fn, includeAll ) {
+
+            switch( this.type ) {
+                case QuadTree.EMPTY : 
+                    if( includeAll ) fn( this );
+                    break;
+                case QuadTree.POINTER :
+                    if( includeAll ) fn( this );
+                    this.nw.traverse( fn, includeAll );
+                    this.ne.traverse( fn, includeAll );
+                    this.sw.traverse( fn, includeAll );
+                    this.se.traverse( fn, includeAll );
+                    break;
+                case QuadTree.LEAF : 
+                    fn( this );
+                    break;
+            }
+        },
+
+        reset : function () {
+            var root = this.getRoot();
+
+            clear( root );
+            
+            for(var i = 0; i < journal.length ; i++) {
+                root.add(journal[i]);
+            }
+        },
+
+        getObjectAtPosition : function( x, y ) {
+                var obj = this.getQuadAt(x,y).getValue();
+                if( obj ) {
+                    if( obj.x() == x && obj.y() == y ) { // expects x() and y() functions to be defined in object
+                        return obj;
+                    }
+                } else {
+                    return null;
+                }
+     
+            },
+            
+            getObjectAt : function ( x, y ) {
+                lookupBox.setCenter( x, y );
+                
+                var objects = this.getObjectsUnder( lookupBox ); // leafs only
+                
+                for ( var i = 0; i  < objects.length; i++ ) { // need to loop returned array to see if objects there contain x y
+                    var obj = objects[i]; 
+                    if( obj.containsPoint( x, y ) ) {
+                        return obj;
+                    }
+                }
+
+                return false;
+
+
+            },
+
+            /** gets Quad at given point
+                q.getQuadAt(x,y).getValue -> gives object in quad, but not necessary under x, y point.
+                to get object under point(x,y ) use QuadTree.getObjectAt(x,y)
+                1) var obj = getQuadAt(x,y).getValue(); obj.containsPoint(x,y) -> obj ==
+                2) getObjectAt(x,y); 
+             */
+            getQuadAt : function( x, y ) {
+                
+                if( !this.containsPoint( x, y ) ) return null;
+                
+                switch (this.type) {
+                    case QuadTree.EMPTY : 
+                        return this;
+                    case QuadTree.LEAF : 
+                        return this;
+                    case QuadTree.POINTER : {
+                        if (this.nw.containsPoint(x, y))
+                            return this.nw.getQuadAt(x, y);
+                        if (this.ne.containsPoint(x, y))
+                            return this.ne.getQuadAt(x, y);
+                        if (this.sw.containsPoint(x, y))
+                            return this.sw.getQuadAt(x, y);
+                        if (this.se.containsPoint(x, y))
+                            return this.se.getQuadAt(x, y);
+                        }
+                    
+                    default: 
+                        return null;
+                }
+            },
+
+            // its actually getObjectsInsideQuadsThatAreUnderBox
+            getObjectsUnder : function ( box ) {
+
+                var toUse = [];
+                
+                var that = this; 
+                
+                function helper(that, toUse, box ) {
+                    
+                    if ( that.intersectsBox( box ) ) {
+                        
+                        switch( that.type ) {
+                            
+                            case QuadTree.POINTER :
+                                helper(that.nw, toUse, box );
+                                helper(that.ne, toUse, box );
+                                helper(that.sw, toUse, box );
+                                helper(that.se, toUse, box );
+                                break;
+                            
+                            case QuadTree.LEAF: 
+                                toUse[ toUse.length ] = that.value;
+                                break;
+                        }
+                    }
+                    return toUse;
+                };
+
+                return helper(that, toUse, box);
+            },
+
+            getAllObjects : function() {
+                return this.getObjectsUnder( this );
+            },
+            
+            getQuadsUnder : function ( box ) {
+                
+                var toUse = [];
+
+                var that = this;
+
+                function helper( that, toUse, box ) {
+                    
+                    if ( that.intersectsBox( box ) ) {
+                        
+                        if ( that.type === QuadTree.LEAF ) {
+                            toUse[ toUse.length ] = that;
+                        
+                        } else if ( that.type === QuadTree.POINTER ) {
+
+                            helper(that.nw, toUse, box);
+                            helper(that.ne, toUse, box);
+                            helper(that.sw, toUse, box);
+                            helper(that.se, toUse, box);
+                        }
+                    }
+                    
+                    return toUse;
+                };
+                
+                return helper(that, toUse, box );
+            }
+    });
+    return QuadTree;
+
+} )();
+
+
+module.exports = QuadTree;
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports) {
+
+// random int between min(inclusive) and max (inclusive)
+function randomInterval(min, max) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+// random int from 0 to value( exclusive )
+// array[random(array.length)] works fine;
+function random(val) {
+	return Math.floor(Math.random() * val);
+}
+
+
+function pickRandomFrom(array) {
+
+	return array[random(array.length)];
+}
+
+module.exports = {
+	randomInterval  : randomInterval,
+	random : random,
+	pickRandomFrom : pickRandomFrom
+}
+
+/***/ }),
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var require;var require;/*! p5.js v0.5.8 March 25, 2017 */
@@ -35216,10 +36171,10 @@ module.exports = {
 };
 },{}]},{},[33])(33)
 });
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
 
 /***/ }),
-/* 3 */
+/* 9 */
 /***/ (function(module, exports) {
 
 var g;
@@ -35246,632 +36201,14 @@ module.exports = g;
 
 
 /***/ }),
-/* 4 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(0);
+module.exports = __webpack_require__(2);
 
 
 /***/ }),
-/* 5 */
-/***/ (function(module, exports) {
-
-
-    var Vect2d = ( function() {
-        
-        function Vect2d( x, y ) {
-            this.x = x || 0.0;
-            this.y = y || 0.0;
-        }    
-        
-        Vect2d.subtract = function (v1, v2) {
-            return new Vect2d(v1.x - v2.x, v1.y - v2.y);
-        };
-
-        Vect2d.dist = function (v1, v2) {
-            const dx = v1.x - v2.x;
-            const dy = v1.y - v2.y;
-            return Math.sqrt(dx * dx + dy * dy);
-        };
-
-        Vect2d.distSq = function (v1, v2) {
-            const dx = v1.x - v2.x;
-            const dy = v1.y - v2.y;
-            return dx * dx + dy * dy;
-        };
-
-        Vect2d.prototype =  { 
-            
-            constructor : Vect2d,
-            
-            set : function( x_, y_ ) {
-                this.x = x_;
-                this.y = y_;
-                return this;
-            }, 
-            
-            add : function( v ) {
-                this.x += v.x;
-                this.y += v.y;
-                return this;                
-            },
-            
-            sub : function (v) {
-                this.x -= v.x;
-                this.y -= v.y;
-                return this;
-            },
-            
-            mult : function (v) {
-                this.x *= v.x;
-                this.y *= v.y;
-                return this;
-            },
-            
-            scale : function (num) {
-                this.x *= num;
-                this.y *= num;
-                return this;
-            },
-            
-            div : function (num) {
-                this.x /= num;
-                this.y /= num;
-                return this;
-            },
-            
-            mag : function () {
-                return Math.sqrt(this.x * this.x + this.y * this.y);
-            },
-            
-            magSq : function () {
-                return this.x * this.x + this.y * this.y;
-            },
-            
-            theta : function () {
-                return Math.atan2( this.y, this.x );
-            },
-
-            normalize : function () {
-                var m = this.mag();
-                if (m > 1)
-                    this.div( m );
-                return this;
-            },
-            
-            setMag : function ( len ) {
-                this.normalize();
-                this.scale( len );
-                return this;
-            },
-            
-            limit : function (max) {
-                return this.magSq() > max * max ? 
-                       this.setMag( max ) : this;
-            },
-            
-            isZero : function(){
-                return this.magSq() < Number.EPSILON;
-            },
-            
-            clamp : function ( max ) {
-                return this.isZero() ? this.scale( 0 ) : this.limit( max );
-            },
-
-            equals : function( v ) {
-                return  ( ( v.x === 0 || v.x ) ? 
-                            ( ( v.y === 0 || v.y ) ? 
-                                ( (this.x === 0 || this.x ) ? 
-                                    ( (this.y === 0 || this.y ) ? 
-                                        Vect2d.subtract( this, v ).isZero() : 
-                                    false ) :
-                                false ) : 
-                            false ) : 
-                        false );
-            }
-        };
-
-        return Vect2d;
-    } )();
-
-
-    module.exports = Vect2d;
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var Vect2d = __webpack_require__(5);
-var { random }  = __webpack_require__(11);
-
-var Box = ( function() {
-        
-        Box.MINSIZE = 6;
-        Box.MAXSIZE = 22;
-        
-        function Box( _left, _top, _width, _height ) {
-            // this.left = _left || 0;
-            // this.top = _top || 0;
-            var s = random( Box.MINSIZE, Box.MAXSIZE );
-            // this.w = _width || s;
-            // this.h = _height || s;
-            this.pos = new Vect2d( _left + _width * 0.5, _top + _height * 0.5 ) || new Vect2d();
-            this.dim = new Vect2d( _width, _height ) ||  new Vect2d( s, s ); 
-        }
-        
-        Box.prototype = {
-
-            constructor : Box,
-
-            // PRIMARY METHODS - work on internal variables
-            setCenter : function( x , y ) {
-                // this.left = x - this.w * 0.5;
-                // this.top = y - this.h * 0.5;
-                this.pos.set( x, y );
-                return this;
-            },
-            
-            getCenter : function() {
-                //return new Vect2d( this.x(), this.y() );
-                return this.pos;
-            },
-            
-
-            getDimension : function() {
-                //return new Vect2d( this.w, this.h ); 
-                return this.dim;
-            },
-
-            setDimension : function( w, h ) {
-                this.dim.set(w, h);
-                return this;
-            },
-            
-            // LEFT
-
-            x1 : function() {
-                //return this.left;
-                return this.pos.x - this.dim.x * 0.5;
-            },
-
-            // TOP
-            y1 : function() {
-                //return this.top;
-                return this.pos.y - this.dim.y * 0.5;
-            },
-
-            // computed CENTER X
-            x : function() {
-                //return this.left + this.w * 0.5;
-                return this.pos.x;
-            },
-
-            // computed CENTER Y 
-            y : function() { 
-                //return this.top + this.h * 0.5;
-                return this.pos.y;
-            },
-
-            // computed RIGHT edge
-            x2 : function() {
-                //return this.left + this.w;
-                return this.pos.x + this.dim.x * 0.5;
-            },
-
-            // computed BOTTOM edge
-            y2 : function() { 
-                //return this.top + this.h;
-                return this.pos.y + this.dim.y * 0.5;
-            },
-            
-            // WIDTH
-            width : function() {
-                //return this.w;
-                return this.dim.x;
-            },
-
-            // HEIGHT
-            height : function() {
-                //return this.h;
-                return this.dim.y;
-            },
-
-            // SECONDARY METHODS - work on primary methods
-            
-            left : function() { 
-                return this.x1();
-            },
-
-            top : function() {
-                return this.y1();
-            },
-
-            bottom : function() {
-                return this.y2();
-            },
-
-            right : function() {
-                return this.x2();
-            },
-            
-            intersects : function ( x1, y1, x2, y2 ) {
-                
-                return !( this.x2() < x1 || 
-                          x2 < this.x1() || 
-                          this.y2() < y1 || 
-                          y2 < this.y1() );    
-            },
-           
-            intersectsBox : function ( box ) {
-                
-                return !( this.x2() < box.x1() || 
-                          box.x2() < this.x1() || 
-                          this.y2() < box.y1() || 
-                          box.y2() < this.y1() );
-                  
-            },
-          
-            containsPoint : function ( xx, yy ) {
-                
-                return xx >= this.x1() && 
-                       yy >= this.y1() && 
-                       xx <= this.x2() && 
-                       yy <= this.y2();
-               
-            },
-            
-            contains : function( x1, y1, x2, y2 ) {
-                return x1 >= this.x1() && 
-                       y1 >= this.y1() && 
-                       x2 <= this.x2() && 
-                       y2 <= this.y2();
-            },
-            
-            containsBox : function( box ) {
-                return box.x1() >= this.x1() && 
-                       box.y1() >= this.y1() && 
-                       box.x2() <= this.x2() && 
-                       box.y2() <= this.y2();
-            }
-        }
-
-        return Box;    
-    } )();
-
-    module.exports = Box;
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var Vect2d = __webpack_require__(5);
-var Box = __webpack_require__(6);
-var Motion = __webpack_require__(8);
-
-
-    var Boxed = ( function() {
-        
-        function Boxed( _cx, _cy, opt_size, opt_data ) {
-
-            this.size = opt_size || random( Box.MINSIZE, Box.MAXSIZE );
-            
-            var d = new Vect2d( this.size, this.size );
-            
-            Motion.call( this, _cx, _cy, d ); 
-
-            // Boxed implementation (related to motion)
-            this.immortal = false;     
-            this.mutable = true;
-
-            //this.data = new DataObject( opt_data || {} );
-            // data container functionality vars 
-            this.value = null;
-            this.name = "";
-            this.icon = null;
-            this.link = "";
-
-            // interactivity functionality vars
-            this.mouseover = false;
-            this.pressed = false;
-            this.dragged = false;
-    
-        }
-
-        Boxed.prototype = Object.assign( {
-            
-            constructor : Boxed,
-
-
-            // INTERACTIVE implementation
-            isMouseOver : function () {
-                
-                return this.mouseover;
-                
-            },
-
-            isPressed : function () {
-                
-                return this.pressed;
-                
-            },
-
-            isDragged : function () {
-                
-                return this.dragged;
-                
-            },
-
-            setPressed : function ( flag ) {
-                
-                this.pressed = flag;
-                
-            },
-
-            setDragged : function ( flag ) {
-                
-                this.dragged = flag;
-                
-            },
-
-            // DATA CONTAINER object implementation
-            setLink : function ( link ) {
-                
-                this.link = link;
-                return this;
-                
-            },
-
-            setIcon : function ( icon ) {
-                
-                this.icon = icon;
-                return this;
-                
-            },
-
-            getValue : function () {
-                
-                return this.value;
-                
-            },
-
-            setValue : function ( val ) {
-                
-                this.value = val;
-                if (this.value !== null)
-                    this.mutable =  false ;
-                else
-                    this.mutable = true;
-                return this;
-                
-            },
-
-            getName : function () {
-                return this.name;
-            },
-
-            setName : function (n) {
-                
-                this.name = n;
-                return this;
-                
-            },
-
-            // BOX implementation 
-            getSize : function () {
-                return this.size;
-            
-            },
-
-            setSize : function ( s ) {
-                this.size = s;
-                this.dim.set( s, s);
-                return this;
-                
-            },
-
-            getPos : function () {
-                return this.pos;
-            },
-            
-
-            // MOTION IMPLEMENTATION
-            seek : function ( vector ) {
-                
-                this.applyForce( Vect2d.subtract( vector, this.pos )
-                        .setMag( Motion.MAXSPEED )
-                        .sub( this.vel )
-                        .limit( Motion.MAXFORCE )
-                        );
-                
-            },
-
-            avoid : function ( vector ) {
-                
-                this.applyForce(
-                        Vect2d.subtract( this.pos, vector )
-                        .setMag( Motion.MAXSPEED )
-                        .sub( this.vel )
-                        .limit( Motion.MAXFORCE ));
-                
-            },
-
-            separate : function ( movers, rootQuad ) {
-                var steer = new Vect2d();
-                var count = 0;
-
-                for (var i = 0; i < movers.length; i++) {
-                    var other = movers[i];
-                    var d = Vect2d.dist( this.pos, other.pos );
-                    var desiredsep = ( this.size + other.size ) * 0.5;
-                        //  if (d === 0) {
-                        //  steer.add(Vect2d.prototype.subtract(this.pos, movers[i].pos).setMag(desiredsep));
-                        //  count++;
-                        //  }
-                    if (d > 0 && d < desiredsep) {
-                        this.immortal = true;
-                        if (!other.immortal)
-                            other.onImpact( rootQuad );
-
-                        steer.add( Vect2d.subtract( this.pos, other.pos ).setMag( 1 / d ) );
-                        count++;
-                    }
-
-
-                }
-                if (count > 0) {
-                    //if(!other.immortal) other.onImpact();
-                    this.applyForce(steer.div(count).setMag( Motion.MAXSPEED)
-                            .sub(this.vel).limit( Motion.MAXSPEED * this.size));
-                } else {
-                    this.immortal = false;
-                    // else -> it goes away using vel set already! hence it moves !
-                }
-
-
-            },
-
-            onImpact : function ( rootQuad ) {
-                //console.log("onImpact()");
-                if ( this.isMutable ) {
-                    var n = this.size;
-
-                    if (n > Box.MINSIZE) {
-                        //console.log("this.size > 4");
-                        //var p = random(1);
-
-                        for (var i = 0; i < random(2, n * 0.5); i++) {
-                            //console.log("forloop impact");
-                            var bx = new Boxed(this.x() + random(1, -1), this.y() + random(1, -1), random(n * 0.5, n * 0.8));
-                            bx.immortal = true;
-                            rootQuad.add( bx );
-                            //addons[addons.length] = bx;
-                        }
-                    }
-                    //console.log("added");
-                    //removals[removals.length]= other;
-                    //removals[removals.length] = this;
-                    rootQuad.remove(this.x(). this.y());
-                    //boxes.remove(this);
-                }
-            },
-
-
-            stayWithin : function ( border ) {
-                var vel = this.vel;
-                if (this.x1() <= border.x1()) {
-
-                    this.vel.set(-vel.x ,vel.y).scale(0.9);;
-                    //this.applyForce(new Vect2d(Boxed.MAXSPEED, vel.y)
-                    //        .sub(vel).limit(Boxed.MAXFORCE));
-
-                } else if (this.x2() >= border.x2()) {
-                    this.vel.set(-vel.x,vel.y).scale(0.9);
-                    // this.applyForce(new Vect2d(-Boxed.MAXSPEED, vel.y)
-                    //         .sub(vel).limit(Boxed.MAXFORCE));
-
-                } else if (this.y1() <= border.y1()) {
-                    this.vel.set(vel.x,-vel.y).scale(0.9);
-                    // this.applyForce(new Vect2d(vel.x, Boxed.MAXSPEED)
-                    //         .sub(vel).limit(Boxed.MAXFORCE));
-
-                } else if (this.y2() >= border.y2()) {
-                    this.vel.set(vel.x,-vel.y).scale(0.9);;
-                    // this.applyForce(new Vect2d(vel.x, -Boxed.MAXSPEED)
-                    //         .sub(vel).limit(Boxed.MAXFORCE));
-
-                }
-            }
-
-        }, Motion.prototype );
-
-        return Boxed;
-    } )();
-    
-module.exports = Boxed;
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-    var Vect2d = __webpack_require__(5);
-    var Box = __webpack_require__(6);
-
-    var Motion = ( function() { 
-        
-        //Motion.IDLE = 1; // able to move but not affected by any forces (velocity = 0)
-        //Motion.MOVING = 2; // is moving currently
-        Motion.MAXSPEED = 20;
-        Motion.MAXFORCE = 0.95;
-        Motion.FRICTION = 0.998; // environmental setting should be set somewhere else
-        
-        function Motion( _cx, _cy, _dim, _mass ) {
-
-            Box.call( this, _cx - _dim.x * 0.5, _cy - _dim.x * 0.5, _dim.x, _dim.y );
-            
-            //this.position = _pos || new Vect2d();
-            this.vel = new Vect2d();
-            this.acc = new Vect2d();
-            this.mass = _mass || 1;
-            //this.state = Motion.IDLE;
-            this.movable = true;
-
-            Object.defineProperty( this, "isMoving", {
-                get : function() { 
-                    return !this.vel.isZero();
-                }
-            });
-
-        }
-
-        
-        Motion.prototype = Object.assign( Box.prototype, {
-            
-            constructor : Motion,
-            
-            update : function() {
-                if( this.movable ) {
-                    this.vel.add( this.acc );
-                    this.acc.scale( 0 );
-                    this.vel.scale( Motion.FRICTION );
-                    this.vel.clamp( Motion.MAXSPEED ); // makes vel to be 0 to MAXSPEED, small numbers are clamped to 0.
-                    if( this.isMoving ) { // if magnitudesq of velocity is larger than very small EPSILON number
-                        //this.state = Motion.MOVING;
-                        this.pos.add( this.vel );
-                    } 
-                    //else {
-                        //this.state = Motion.IDLE; 
-                    //}
-                }
-                
-                
-            },
-
-            setMovable : function( flag ) {
-                this.movable = flag;
-                if( !this.movable ) {
-                    this.acc.scale( 0 );
-                    this.vel.scale( 0 );
-                    this.state = Motion.IDLE;
-                }
-            },
-            
-            applyForce : function( force ) {
-                if( this.movable ) { 
-                    force.div( this.mass );
-                    this.acc.add( force );
-                    this.acc.clamp( Motion.MAXFORCE );
-                }
-            }
-        } );
-
-        return Motion;
-    } )();
-
-
-    module.exports = Motion;
-
-/***/ }),
-/* 9 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
  /** 
@@ -35879,10 +36216,10 @@ module.exports = Boxed;
  * @author www.stopyransky.com
  * @since May 5, 2015
  */ 
-var Vect2d = __webpack_require__(5);
-var Box = __webpack_require__(6);
-var Boxed = __webpack_require__(7);
-var QuadTree = __webpack_require__(10);
+var Vect2d = __webpack_require__(1);
+var Box = __webpack_require__(0);
+var Boxed = __webpack_require__(3);
+var QuadTree = __webpack_require__(6);
 
 var Pixeloze = ( function( window ) {
     
@@ -35892,6 +36229,7 @@ var Pixeloze = ( function( window ) {
 
     var ORANGE, YELLOW, WHITE;
     var container;
+    var updates = [];
 
     function setup() {
 
@@ -35963,23 +36301,36 @@ var Pixeloze = ( function( window ) {
     var updateMotion = function(quad) {
         var b = quad.getValue();
         if( b ) {
-            if(!b.mutable) return;
-                b.update();
+            b.update();
+        }
+        if(quad.containsPoint(b.x(), b.y())) {
+
+        } else {
+            
+            root.remove(b.x(), b.y());
+            updates.push(b);
         }
     };
+
+    function update() {
+
+        root.traverse( applyBehaviors, false );    
+        root.traverse( updateMotion, false );
+        root.reset();
+    }
 
     var applyBehaviors = function(quad) {
         var b = quad.getValue();
         if( b ) {
-            if(!b.mutable) b.stayWithin(root);
-            b.separate( root.getObjectsUnder( b ), addons, removals );
+            b.stayWithin(root);
+            var neighbours = root.getObjectsUnder(b);
+            b.separate( neighbours );
         }
     };
 
     function draw() {
         
-        root.traverse( applyBehaviors, false);    
-        root.traverse( updateMotion, false );
+        update();
 
         background(222);
         
@@ -36030,562 +36381,6 @@ var Pixeloze = ( function( window ) {
 module.exports = Pixeloze;
 
 
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-   var Box = __webpack_require__(6);
-
-    var QuadTree = ( function () { 
-        /* to fix 
-        *  - when update() POINTER returns error (null) when checking its sub-quads
-        *  - subdivide() might omit some objects to be readded to quad 
-        *  - balance() pointer with zero size is 
-        */
-        // static variables
-        QuadTree.EMPTY = 0;
-        QuadTree.LEAF = 1;
-        QuadTree.POINTER = 2;
-        QuadTree.OFFSET = Box.MAXSIZE * 2; // to help looking objects on border of quads
-         
-        var lookupBox = new Box( 0, 0, QuadTree.OFFSET, QuadTree.OFFSET );
-        //var toReset = [];
-
-        function QuadTree( left_, top_, width_, height_, opt_parent ) {
-            
-            Box.call( this, left_, top_, width_, height_ );
-
-            this.parent = opt_parent || null;
-
-            this.nw = null;
-            this.ne = null;
-            this.sw = null;
-            this.se = null;
-            
-            this.value = null;
-            
-            this.type = QuadTree.EMPTY;
-        }
-       
-        // should be private 
-        function clear( quad ) {
-            quad.value = null;
-            quad.nw = null;
-            quad.ne = null;
-            quad.sw = null;
-            quad.se = null;
-            quad.type = QuadTree.EMPTY;
-            //quad.parent = null;
-        }
-
-        function put( quad, box ) {
-            quad.value = box;
-            quad.type = QuadTree.LEAF;
-        }
-        
-        function subdivide( quad ) {
-            
-            var halfw = quad.width() * 0.5,
-                halfh = quad.height() * 0.5,
-                    x = quad.x1(),
-                    y = quad.y1();
-
-            quad.nw = new QuadTree( x        , y        , halfw, halfh, quad );
-            quad.ne = new QuadTree( x + halfw, y        , halfw, halfh, quad );
-            quad.sw = new QuadTree( x        , y + halfh, halfw, halfh, quad );
-            quad.se = new QuadTree( x + halfw, y + halfh, halfw, halfh, quad );
-
-            var b = quad.value;
-            quad.value = null;
-            quad.type = QuadTree.POINTER;
-            var cx = b.x();
-            var cy = b.y();
-            
-            if ( quad.nw.containsPoint( cx, cy ) ) {
-                //quad.nw.add( b );
-                put(quad.nw, b );
-            } else if ( quad.ne.containsPoint( cx, cy ) ) {
-                //quad.ne.add( b );
-                put(quad.ne, b );
-            } else if ( quad.sw.containsPoint( cx, cy ) ) {
-                //quad.sw.add( b );
-                put( quad.sw, b );
-            } else if ( quad.se.containsPoint( cx, cy ) ) {
-                //quad.se.add( b );
-                put( quad.se, b );
-            } else {
-                console.log( "QuadTree.subdivide(): Failed to re-add object on subdivide. Makes quad.pointer size === 0!");
-            }
-            
-            // var readded = quad.nw.add( b ) || 
-            //               quad.ne.add( b ) || 
-            //               quad.sw.add( b ) || 
-            //               quad.se.add( b );
-
-            //if( !readded ) {
-            //    console.log( "QuadTree.subdivide(): Failed to re-add object on subdivide. Makes quad.pointer size === 0!");
-            //    //clear( quad );
-            //}
-            // can be due to adding to quad object with the same coordinates
-            //    throw new Error("QuadTree.subdivide(): Failed to re-add object on subdivide: " + b.toSource());
-            
-            return true ;
-
-            // if ( quad.nw.containsPoint( cx, cy ) ) {
-            //     quad.nw.add( b );
-            //     //put(quad.nw, b );
-            // } else if ( quad.ne.containsPoint( cx, cy ) ) {
-            //     quad.ne.add( b );
-            //     //put(quad.ne, b );
-            // } else if ( quad.sw.containsPoint( cx, cy ) ) {
-            //     quad.sw.add( b );
-            //     //put( quad.sw, b );
-            // } else if ( quad.se.containsPoint( cx, cy ) ) {
-            //     quad.se.add( b );
-            //     //put( quad.se, b );
-            // }
-        }
-        
-        function balance( pointer ) {
-            if(pointer.getSize() === 0 ) {
-                // clearly error, so to fix it:
-                pointer.nw = null;
-                pointer.ne = null;
-                pointer.sw = null;
-                pointer.se = null;
-                pointer.value = null;
-                pointer.type = QuadTree.EMPTY;
-                if (pointer.parent) {
-                    return balance( pointer.parent );
-                }
-                return true;    
-            }
-
-            var nwType = pointer.nw.getType(),
-                neType = pointer.ne.getType(),
-                swType = pointer.sw.getType(),
-                seType = pointer.se.getType();
-            
-
-            
-            if( nwType == QuadTree.POINTER || 
-                neType == QuadTree.POINTER || 
-                swType == QuadTree.POINTER || 
-                seType == QuadTree.POINTER ) {
-                return false;
-            }
-
-
-            //console.log( pointer.getSize() );
-            if( pointer.getSize() === 1 ) {
-                
-                //var b = pointer.getObjectsUnder( pointer )[ 0 ]; // wrong
-                
-                var b = nwType == QuadTree.LEAF ? pointer.nw.value :
-                        neType == QuadTree.LEAF ? pointer.ne.value :
-                        swType == QuadTree.LEAF ? pointer.sw.value :
-                        seType == QuadTree.LEAF ? pointer.se.value :
-                        null;
-
-                if( b == null ) {
-                    throw new Error("QuadTree.balance(): size is 1 but value is null - should not happen" );
-                    // pointer it's a pointer without LEAF nodes (only EMPTY ones) - fix.
-                }
-                
-                pointer.nw = null;
-                pointer.ne = null;
-                pointer.sw = null;
-                pointer.se = null;
-                pointer.value = b;
-                pointer.type = QuadTree.LEAF;
-                if (pointer.parent) {
-                    return balance( pointer.parent );
-                }
-                return true;
-            }
-            if( pointer.getSize() === 0 ) {
-                console.log("BUG ! pointer has zero size! " + pointer.getSize());  
-
-            }
-
-            return false;
-        }
-        
-
-        
-        function resetOnUpdate( leaf ) {
-            var val = leaf.getValue();
-            toReset.push( val );
-            var p = leaf.parent;
-            leaf.parent = null;
-            clear( leaf );
-            //leaf.getRoot().add( val );
-            if( p ) balance( p );
-            // if ( leaf.getRoot().add( val ) ) {
-            //     //console.log( 're-added to root' );
-            //     clear( leaf );
-            //     balance( p );
-            // } else {
-
-            //     // can happen if val is out of the root borders -> how to handle?
-            //     console.log( 'failed to re-add to root');
-            // }
-
-        }
-         
-        QuadTree.prototype = Object.assign( { 
-            
-            constructor : QuadTree,
-
-            getRoot : function () {
-                return this.parent == null ? this : this.parent.getRoot();
-            },
-            
-            getValue : function() {
-                return this.value;
-            },
-
-            getType : function() { 
-                return this.type;
-            },
-
-            // consider add = function( x, y, obj ) {}
-            add : function ( box ) {
-                
-                const x = box.x();
-                const y = box.y();
-                
-                if ( !this.containsPoint( x, y ) ) {
-                       return false; // object is not within this quad borders
-                }
-                //if( this.getObjectAtPosition( x, y ) ) {
-                    // overload value = [] and push new object to the array along with existing one
-                    // on update of quadtree check if position of objects are stil the same
-                    // if yes keep them in array
-                    // if no remove them  from array and put in proper quad
-                //    return false; // object with the same coordinates already there;
-                //}
-                switch ( this.type ) {
-                    case QuadTree.EMPTY:
-                        // console.log("adding " + box.toSource()); 
-                        //this.put( box );
-                        put( this, box );
-                        return true;
-                    case QuadTree.LEAF:
-                        //console.log ( "readded in subdivide: " + subdivide( this ) ) ;
-                        subdivide( this );
-                        //return true; //don't return here -> let case pointer to work after subdivide!
-                    case QuadTree.POINTER:
-                        if ( this.nw.containsPoint( x, y ) )
-                            return this.nw.add( box );
-                        else if ( this.ne.containsPoint( x, y ) )
-                            return this.ne.add( box );
-                        else if (this.sw.containsPoint( x, y ) )
-                            return this.sw.add( box );
-                        else if (this.se.containsPoint( x, y ) )
-                            return this.se.add( box );
-                    default : 
-                        throw new Error("QuadTree.add(): not recognized quad type" + this.type);
-                }
-            },
-
-            getSize : function() {
-               
-                switch( this.type ) {
-
-                    case QuadTree.POINTER: {
-                        let count = 0;
-                        count += this.nw.getSize();
-                        count += this.ne.getSize();
-                        count += this.sw.getSize();
-                        count += this.se.getSize();
-                        return count;
-                    };
-                    case QuadTree.LEAF:
-                        return 1;
-                    default : 
-                        return 0;
-                }
-            },
-            
-            remove : function( x, y ) {
-                
-                lookupBox.setCenter( x, y );
-                
-                var quads = this.getQuadsUnder( lookupBox ); // leafs only
-                
-                var quad = null;
-                
-                for ( var i = 0; i  < quads.length; i++ ) {
-                    if( quads[i].value.containsPoint( x, y ) ) {
-                        quad = quads[i];
-                        break;
-                    }
-                }
-
-                if( quad == null ) return false; 
-
-                if( quad.type == QuadTree.EMPTY ) {
-                    return false;
-                } else {
-                    //it is a leaf
-                    var val = quad.value;
-                    if( val.containsPoint( x, y ) ) {
-                        quad.value = null;
-                        quad.type = QuadTree.EMPTY;
-                        if( quad.parent ) balance( quad.parent );
-                        //return removed object;
-                        return val;
-                    }
-
-                    return false;
-                }
-            },
-
-                    // in case of moving objects
-            update : function () {
-                
-                var toUpdate = [];
-                
-                var that = this;
-                
-                function doUpdate( q, toUpdate ) {
-
-                    switch( q.type ) {
-                        case QuadTree.POINTER: // ifs should not be needed here, but now if not checked throw error xx is null
-                            if( q.nw ) 
-                                doUpdate(q.nw, toUpdate );
-                                //this.nw.update();
-                            if( q.ne) 
-                                //this.ne.update();
-                                doUpdate(q.ne, toUpdate );
-                            if( q.sw) 
-                                //this.sw.update();
-                                doUpdate(q.sw, toUpdate );
-                            if( q.se) 
-                                //this.se.update();
-                                doUpdate(q.se, toUpdate );
-                            break;
-                        
-                        case QuadTree.LEAF : 
-                            if( !q.containsPoint( q.value.x(), q.value.y() ) )  {
-                                // not within my borders! throw it up to parent
-                                //resetOnUpdate( this );
-
-                                var val = q.getValue();
-                                toUpdate.push( val );
-                                var p = q.parent;
-                                //that.parent = null;
-                                clear( q );
-                                if( p ) balance( p );
-                            }
-                        break;
-                        case QuadTree.EMPTY : 
-
-                    }
-
-                }
-
-                doUpdate( that, toUpdate );
-
-                //  re-add the ones that are not within their quads anymore
-                if( toUpdate.length > 0 ) {
-                    for( var i = 0; i < toUpdate.length; i++ ) {
-                        var val = toUpdate[i];
-                        this.add( val );
-                    }
-                }
-
-            },
-
-            /**
-             *   Traverses from root quadtree to its leaves and executes fn function:
-             *   - if includeAll flag is true - executes fn on every quad
-             *   - if includeAll flag is false - executes fn only on LEAF quads.  
-             *
-             *   @param   {Function}   fn           function to execute on traversed quad
-             *   @param   {[type]}     includeAll   whether or not to execute fn on all quads or only leafs.
-             *
-             */
-            traverse : function ( fn, includeAll ) {
-
-                switch( this.type ) {
-                    case QuadTree.EMPTY : 
-                        if( includeAll ) fn( this );
-                        break;
-                    case QuadTree.POINTER :
-                        if( includeAll ) fn( this );
-                        this.nw.traverse( fn, includeAll );
-                        this.ne.traverse( fn, includeAll );
-                        this.sw.traverse( fn, includeAll );
-                        this.se.traverse( fn, includeAll );
-                        break;
-                    case QuadTree.LEAF : 
-                        fn( this );
-                        break;
-                }
-            },    
-            
-            getObjectAtPosition : function( x, y ) {
-                var obj = this.getQuadAt(x,y).getValue();
-                if( obj ) {
-                    if( obj.x() == x && obj.y() == y ) { // expects x() and y() functions to be defined in object
-                        return obj;
-                    }
-                } else {
-                    return null;
-                }
-     
-            },
-            
-            getObjectAt : function ( x, y ) {
-                lookupBox.setCenter( x, y );
-                
-                var objects = this.getObjectsUnder( lookupBox ); // leafs only
-                
-                for ( var i = 0; i  < objects.length; i++ ) { // need to loop returned array to see if objects there contain x y
-                    var obj = objects[i]; 
-                    if( obj.containsPoint( x, y ) ) {
-                        return obj;
-                    }
-                }
-
-                return false;
-
-
-            },
-
-            /** gets Quad at given point
-                q.getQuadAt(x,y).getValue -> gives object in quad, but not necessary under x, y point.
-                to get object under point(x,y ) use QuadTree.getObjectAt(x,y)
-                1) var obj = getQuadAt(x,y).getValue(); obj.containsPoint(x,y) -> obj ==
-                2) getObjectAt(x,y); 
-             */
-            getQuadAt : function( x, y ) {
-                
-                if( !this.containsPoint( x, y ) ) return null;
-                
-                switch (this.type) {
-                    case QuadTree.EMPTY : 
-                        return this;
-                    case QuadTree.LEAF : 
-                        return this;
-                    case QuadTree.POINTER : {
-                        if (this.nw.containsPoint(x, y))
-                            return this.nw.getQuadAt(x, y);
-                        if (this.ne.containsPoint(x, y))
-                            return this.ne.getQuadAt(x, y);
-                        if (this.sw.containsPoint(x, y))
-                            return this.sw.getQuadAt(x, y);
-                        if (this.se.containsPoint(x, y))
-                            return this.se.getQuadAt(x, y);
-                        }
-                    
-                    default: 
-                        return null;
-                }
-            },
-
-            // its actually getObjectsInsideQuadsThatAreUnderBox
-            getObjectsUnder : function ( box ) {
-
-                var toUse = [];
-                
-                var that = this; 
-                
-                function helper(that, toUse, box ) {
-                    
-                    if ( that.intersectsBox( box ) ) {
-                        
-                        switch( that.type ) {
-                            
-                            case QuadTree.POINTER :
-                                helper(that.nw, toUse, box );
-                                helper(that.ne, toUse, box );
-                                helper(that.sw, toUse, box );
-                                helper(that.se, toUse, box );
-                                break;
-                            
-                            case QuadTree.LEAF: 
-                                toUse[ toUse.length ] = that.value;
-                                break;
-                        }
-                    }
-                    return toUse;
-                };
-
-                return helper(that, toUse, box);
-            },
-
-            getAllObjects : function() {
-                return this.getObjectsUnder( this );
-            },
-            
-            getQuadsUnder : function ( box ) {
-                
-                var toUse = [];
-
-                var that = this;
-
-                function helper( that, toUse, box ) {
-                    
-                    if ( that.intersectsBox( box ) ) {
-                        
-                        if ( that.type === QuadTree.LEAF ) {
-                            toUse[ toUse.length ] = that;
-                        
-                        } else if ( that.type === QuadTree.POINTER ) {
-
-                            helper(that.nw, toUse, box);
-                            helper(that.ne, toUse, box);
-                            helper(that.sw, toUse, box);
-                            helper(that.se, toUse, box);
-                        }
-                    }
-                    
-                    return toUse;
-                };
-                
-                return helper(that, toUse, box );
-            }
-        
-        }, Box.prototype );
- 
-
-        return QuadTree;
-    } )();
-
-
-    module.exports = QuadTree;
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports) {
-
-// random int between min(inclusive) and max (inclusive)
-function randomInterval(min, max) {
-	return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-
-// random int from 0 to value( exclusive )
-// array[random(array.length)] works fine;
-function random(val) {
-	return Math.floor(Math.random() * val);
-}
-
-
-function pickRandomFrom(array) {
-
-	return array[random(array.length)];
-}
-
-module.exports = {
-	randomInterval  : randomInterval,
-	random : random,
-	pickRandomFrom : pickRandomFrom
-}
 
 /***/ })
 /******/ ]);
